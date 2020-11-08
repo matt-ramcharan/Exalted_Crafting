@@ -21,7 +21,7 @@ window.close()
 
 
 class crafter:
-    def __init__(self,attribute,ability):
+    def __init__(self,attribute,ability,supremeMasterworkFocus=True,):
         self.attribute = attribute
         self.ability = ability
         self.dice = attribute+ability
@@ -48,6 +48,21 @@ class crafter:
         else:
             #Double 8s (Basic, major or superior Project; 5m, 1WP, 1GXP)
             self.successes = [2 if (i == 8 or i == 9) else i for i in self.dice_results]
+
+    def flawlessHandiworkMethod(self):
+        return
+
+    def experientialConjuringofTrueVoid(self):
+        return
+
+    def firstMovementoftheDemiurge(self):
+        return
+
+    def divineInspirationTechnique(self):
+        return
+
+    def holisticMiracleUnderstanding(self):
+        return
 
 
 fang=crafter(5,5)
