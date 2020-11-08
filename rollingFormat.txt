@@ -1,0 +1,34 @@
+Roll
+Attribute+Ability Dice
+
++ 1 Auto Success Willpower
++ Stunts
+	1 pt = 2 dice
+	2 pt = 2 dice + 1 Auto Success + 1 willpower gain
+	3 pt = 2 dice + 2 Auto Success + 2 willpower gain 
+	
++ charm dice
+	4 dice bracers of universal crafting
+	Excellency dice (up to Attribute+Ability-used charm dice) costs 1 mote per die
+	
+Bonuses
+	Supreme Masterwork Focus (2)
+		Double 9s (basic and major projects; 6m)
+		OR Double 8s (Basic, major or superior Project; 5m, 1WP, 1GXP)
+	Flawless Handiwork Method (2)
+		Reroll 10s until 10s fail to appear 
+		AND Reroll 6s until 6s fail to appear (6m)
+	Experiential Conjuring of True Void
+		1 non charm auto Success & int+Essence additional non charm dice (major, superier, legendary; 4m, 4s/g/wxp)
+	First Movement of the Demiurge
+		When using Experiential Conjuring of True Void
+		For every 3 of a kind successes, choose one non success dice and convert to a 10
+		If flawless handiwork method is used, 10s are rerolled until 10s fail to appear
+	Divine Inspiration Technique
+		for every 3 successes on craft roll, earn an additional non-charm die, recursive.
+	Holistic Miracle Understanding
+		If Divine Inspiration Technique non charm dice turn up 3 or more successes, add an additional 3 non charm dice
+	
+misc other costs
+	Craftsman needs no tools 6 mote
+	Arete shifting Prana (if no appropriate craft) 4m 1sxp, 1wp
