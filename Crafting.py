@@ -21,10 +21,47 @@ window.close()
 
 
 class crafter:
-    def __init__(self,attribute,ability,supremeMasterworkFocus=True,):
+    def __init__(self,attribute,ability,stunt=0,supremeMasterworkFocus=False):
         self.attribute = attribute
         self.ability = ability
-        self.dice = attribute+ability
+        self.dice = attribute+ability+self.stunt_reward(stunt)[0]
+        self.dice_pool = []
+        self.supremeMasterworkFocus=supremeMasterworkFocus
+
+    def scenario(self):
+        #Temporary function to run a potential roll
+        #Roll Initial Pool
+        self.roll()
+
+        #Roll extra dice with Experiential Conjuring of True Void
+
+        #Double 9s or 8s with Supreme Masterwork Focus
+
+        #Reroll 10s and 6s with Flawless Handiwork Method.
+
+        #If ECoTV is active, with 3 of a kind successes, chose one non success die and convert to a 10
+
+        #Apply Divine inspiration technique - recursively gain additional non charm dice
+
+        #Key off DIT roll with Holistic Miracle Understanding
+
+    def stunt_reward(self,stunt_num):
+        def zero():
+            return [0,0,0]
+        def one():
+            #return 2 dice, 0 auto success, 0 willpower
+            return [2,0,0]
+        def two():
+            return [2,1,1]
+        def three():
+            return [2,2,2]
+
+        options = {0 : zero(),
+                   1 : one(),
+                   2 : two(),
+                   3 : three()
+        }
+        return options[stunt_num]
 
     #Roll x number of dice and store to list
     def roll(self):
