@@ -21,21 +21,19 @@ window.close()
 
 
 class crafter:
-    def __init__(self,attribute,ability,stunt=0,supremeMasterworkFocus=False):
+    def __init__(self,attribute,ability,stunt=0,supremeMasterworkFocusActive=True):
         self.attribute = attribute
         self.ability = ability
         self.dice = attribute+ability+self.stunt_reward(stunt)[0]
         self.dice_pool = []
-        self.supremeMasterworkFocus=supremeMasterworkFocus
+        self.supremeMasterworkFocusActive=supremeMasterworkFocusActive
 
     def scenario(self):
         #Temporary function to run a potential roll
         #Roll Initial Pool
-        self.roll()
+        self.dice_pool = self.roll(self.dice)
 
         #Roll extra dice with Experiential Conjuring of True Void
-
-        #Double 9s or 8s with Supreme Masterwork Focus
 
         #Reroll 10s and 6s with Flawless Handiwork Method.
 
@@ -44,6 +42,10 @@ class crafter:
         #Apply Divine inspiration technique - recursively gain additional non charm dice
 
         #Key off DIT roll with Holistic Miracle Understanding
+
+        #Double 9s or 8s with Supreme Masterwork Focus
+        if self.supremeMasterworkFocusActive:
+            self.supremeMasterworkFocus(advanced=True)
 
     def stunt_reward(self,stunt_num):
         def zero():
@@ -64,14 +66,15 @@ class crafter:
         return options[stunt_num]
 
     #Roll x number of dice and store to list
-    def roll(self):
+    def roll(self,ndice):
         #roll the dice
-        self.dice_results=[random.randint(1, 10) for i in range(0, self.dice)]
-        return self.dice_results
+        dice_results=[random.randint(1, 10) for i in range(0, ndice)]
+        #list concatentation
+        self.dice_pool += dice_results
 
     def success(self):
         #Detect number of successes. Create list of 1 or 2 depending on 10 status
-        self.successes = [(1 if (i>=7 and i<10) else (2 if i==10 else 0)) for i in self.dice_results]
+        self.successes = [(1 if (i>=7 and i<10) else (2 if i==10 else 0)) for i in self.dice_pool]
         return self.successes
 
     def total_succ(self):
@@ -79,12 +82,14 @@ class crafter:
 
     def supremeMasterworkFocus(self, advanced=False):
         if advanced:
-            #Double 9s (basic and major projects; 6m)
-            self.successes=[2 if i==9 else i for i in self.dice_results]
+            #Double 8s (Basic, major or superior Project; 5m, 1WP, 1GXP)
+            self.successes = [2 if (i >= 8) else 0 for i in self.dice_pool]
+            return self.successes
 
         else:
-            #Double 8s (Basic, major or superior Project; 5m, 1WP, 1GXP)
-            self.successes = [2 if (i == 8 or i == 9) else i for i in self.dice_results]
+            #Double 9s (basic and major projects; 6m)
+            self.successes=[2 if i>=9 else 0 for i in self.dice_pool]
+            return self.successes
 
     def flawlessHandiworkMethod(self):
         return
@@ -103,6 +108,5 @@ class crafter:
 
 
 fang=crafter(5,5)
-fang.roll()
-print(fang.dice_results)
+print(fang.dice_pool)
 fang.success()
