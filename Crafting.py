@@ -1,6 +1,7 @@
 import random
 import PySimpleGUI as sg
 # from itertools import chain
+from collections import Counter
 
 # sg.theme('DarkAmber')   # Add a touch of color
 # # All the stuff inside your window.
@@ -114,8 +115,28 @@ class crafter:
         self.autosucc += 1
 
 
-    def firstMovementoftheDemiurge(self):
-        return
+    def firstMovementoftheDemiurge(self,ECoTV):
+        #FMotD enhances the prerequisite, so EcoTV must be active
+        if ECoTV==True:
+            success_res=[res.result for res in self.dice_pool if (res.result>=7 and res.FmoDThree==False)]
+            success_counts = Counter(success_res)
+            total_ten_changes=sum([success_counts[7] // 3,
+                                    success_counts[8] // 3,
+                                    success_counts[9] // 3,
+                                    success_counts[10] // 3])
+
+            #Add FmoDThree tag to dice used to convert non succ to 10s
+            for i in success_counts:
+                for j in range(0,success_counts[i]):
+                    for die in self.dice_pool:
+                        if die.result==i:
+                            die.FmoDThree=True
+            #Convert non succ to 10s
+            for die in self.dice_pool:
+                if die.result<7:
+                    if total_ten_changes>0:
+                        die.result=10
+                        total_ten_changes-=1
 
     def divineInspirationTechnique(self):
         return
