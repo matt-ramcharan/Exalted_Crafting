@@ -68,13 +68,13 @@ class crafter:
     #Roll x number of dice and store to list
     def roll(self,ndice):
         #roll the dice
-        dice_results=[random.randint(1, 10) for i in range(0, ndice)]
+        dice_results=[diceresult(random.randint(1, 10)) for i in range(0, ndice)]
         #list concatentation
         self.dice_pool += dice_results
 
     def success(self):
         #Detect number of successes. Create list of 1 or 2 depending on 10 status
-        self.successes = [(1 if (i>=7 and i<10) else (2 if i==10 else 0)) for i in self.dice_pool]
+        self.successes = [(1 if (i.result>=7 and i.result<10) else (2 if i.result==10 else 0)) for i in self.dice_pool]
         return self.successes
 
     def total_succ(self):
@@ -83,16 +83,26 @@ class crafter:
     def supremeMasterworkFocus(self, advanced=False):
         if advanced:
             #Double 8s (Basic, major or superior Project; 5m, 1WP, 1GXP)
-            self.successes = [2 if (i >= 8) else 0 for i in self.dice_pool]
+            self.successes = [2 if (i.result >= 8) else 0 for i in self.dice_pool]
             return self.successes
 
         else:
             #Double 9s (basic and major projects; 6m)
-            self.successes=[2 if i>=9 else 0 for i in self.dice_pool]
+            self.successes=[2 if i.result>=9 else 0 for i in self.dice_pool]
             return self.successes
 
     def flawlessHandiworkMethod(self):
-        return
+        new_tens = sum([1 if (res.tenreroll==False and res.result==10) else 0 for res in self.dice_pool])
+        for die in self.dice_pool:
+            if (die.result==10 and die.tenreroll==False):
+                die.tenreroll=True
+        self.roll(new_tens)
+
+        new_sixes = sum([1 if (res.sixreroll==False and res.result==6) else 0 for res in self.dice_pool])
+        for die in self.dice_pool:
+            if (die.result==6 and die.sixreroll==False):
+                die.sixreroll=True
+        self.roll(new_sixes)
 
     def experientialConjuringofTrueVoid(self):
         return
@@ -106,6 +116,16 @@ class crafter:
     def holisticMiracleUnderstanding(self):
         return
 
+class diceresult:
+    def __init__(self,die):
+        self.result=die
+        self.tenreroll=False
+        self.sixreroll=False
+        self.FmoDThree=False
+        self.DITThree=False
+
+#Return list of dice results from list of objects
+#[dice_pool.result for dice_pool in fang.dice_pool]
 
 fang=crafter(5,5)
 print(fang.dice_pool)
