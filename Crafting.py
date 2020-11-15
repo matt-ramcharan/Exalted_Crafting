@@ -127,7 +127,7 @@ class crafter:
 
             #Add FmoDThree tag to dice used to convert non succ to 10s
             for i in success_counts:
-                for j in range(0,success_counts[i]):
+                for j in range(0,success_counts[i]//3):
                     for die in self.dice_pool:
                         if die.result==i:
                             die.FmoDThree=True
@@ -158,3 +158,8 @@ class diceresult:
 fang=crafter(5,5)
 print(fang.dice_pool)
 fang.success()
+
+fang.dice_pool=[diceresult(1),diceresult(1),diceresult(1),diceresult(1),diceresult(9),diceresult(9),diceresult(9)]
+fang.firstMovementoftheDemiurge(True)
+[dice_pool.result for dice_pool in fang.dice_pool]
+[dice_pool.FmoDThree for dice_pool in fang.dice_pool]
