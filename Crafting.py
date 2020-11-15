@@ -2,31 +2,34 @@ import random
 import PySimpleGUI as sg
 # from itertools import chain
 
-sg.theme('DarkAmber')   # Add a touch of color
-# All the stuff inside your window.
-layout = [  [sg.Text('Some text on Row 1')],
-            [sg.Text('Enter something on Row 2'), sg.InputText()],
-            [sg.Button('Ok'), sg.Button('Cancel')] ]
-
-# Create the Window
-window = sg.Window('Window Title', layout)
-# Event Loop to process "events" and get the "values" of the inputs
-while True:
-    event, values = window.read()
-    if event == sg.WIN_CLOSED or event == 'Cancel': # if user closes window or clicks cancel
-        break
-    print('You entered ', values[0])
-
-window.close()
+# sg.theme('DarkAmber')   # Add a touch of color
+# # All the stuff inside your window.
+# layout = [  [sg.Text('Some text on Row 1')],
+#             [sg.Text('Enter something on Row 2'), sg.InputText()],
+#             [sg.Button('Ok'), sg.Button('Cancel')] ]
+#
+# # Create the Window
+# window = sg.Window('Window Title', layout)
+# # Event Loop to process "events" and get the "values" of the inputs
+# while True:
+#     event, values = window.read()
+#     if event == sg.WIN_CLOSED or event == 'Cancel': # if user closes window or clicks cancel
+#         break
+#     print('You entered ', values[0])
+#
+# window.close()
 
 
 class crafter:
-    def __init__(self,attribute,ability,stunt=0,supremeMasterworkFocusActive=True):
+    def __init__(self,attribute,ability,essence=3,int=4,stunt=0,supremeMasterworkFocusActive=True):
         self.attribute = attribute
         self.ability = ability
-        self.dice = attribute+ability+self.stunt_reward(stunt)[0]
+        self.dice = attribute+ability
         self.dice_pool = []
         self.supremeMasterworkFocusActive=supremeMasterworkFocusActive
+        self.essence=essence
+        self.int=int
+        self.autosucc=0
 
     def scenario(self):
         #Temporary function to run a potential roll
@@ -63,7 +66,9 @@ class crafter:
                    2 : two(),
                    3 : three()
         }
-        return options[stunt_num]
+
+        self.roll(options[stunt_num][0])
+        self.autosucc+=options[stunt_num][1]
 
     #Roll x number of dice and store to list
     def roll(self,ndice):
@@ -105,7 +110,9 @@ class crafter:
         self.roll(new_sixes)
 
     def experientialConjuringofTrueVoid(self):
-        return
+        self.roll(self.int+self.essence)
+        self.autosucc += 1
+
 
     def firstMovementoftheDemiurge(self):
         return
