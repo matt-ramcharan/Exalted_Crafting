@@ -2,6 +2,7 @@ import random
 import PySimpleGUI as sg
 # from itertools import chain
 from collections import Counter
+import numpy as np
 
 # sg.theme('DarkAmber')   # Add a touch of color
 # # All the stuff inside your window.
@@ -22,12 +23,13 @@ from collections import Counter
 
 
 class crafter:
-    def __init__(self,attribute,ability,essence=3,int=4,stunt=0,supremeMasterworkFocusActive=True):
+    def __init__(self,attribute,ability,essence=3,int=4,stunt=0,supremeMasterworkFocusActive=False,SMFAdvanced=False):
         self.attribute = attribute
         self.ability = ability
         self.dice = attribute+ability
         self.dice_pool = []
         self.supremeMasterworkFocusActive=supremeMasterworkFocusActive
+        self.SMFAdvanced=SMFAdvanced
         self.essence=essence
         self.int=int
         self.autosucc=0
@@ -35,21 +37,40 @@ class crafter:
     def scenario(self):
         #Temporary function to run a potential roll
         #Roll Initial Pool
-        self.dice_pool = self.roll(self.dice)
+        self.roll(self.dice)
 
         #Roll extra dice with Experiential Conjuring of True Void
+        self.experientialConjuringofTrueVoid()
 
         #Reroll 10s and 6s with Flawless Handiwork Method.
+        self.flawlessHandiworkMethod()
 
         #If ECoTV is active, with 3 of a kind successes, chose one non success die and convert to a 10
+        self.firstMovementoftheDemiurge(True)
 
         #Apply Divine inspiration technique - recursively gain additional non charm dice
-
-        #Key off DIT roll with Holistic Miracle Understanding
+        self.divineInspirationTechnique()
 
         #Double 9s or 8s with Supreme Masterwork Focus
         if self.supremeMasterworkFocusActive:
-            self.supremeMasterworkFocus(advanced=True)
+            self.supremeMasterworkFocus()
+
+    def scenario_recur(self):
+        #Roll extra dice with Experiential Conjuring of True Void
+        self.experientialConjuringofTrueVoid()
+
+        #Reroll 10s and 6s with Flawless Handiwork Method.
+        self.flawlessHandiworkMethod()
+
+        #If ECoTV is active, with 3 of a kind successes, chose one non success die and convert to a 10
+        self.firstMovementoftheDemiurge(True)
+
+        #Apply Divine inspiration technique - recursively gain additional non charm dice
+        self.divineInspirationTechnique()
+
+        #Double 9s or 8s with Supreme Masterwork Focus
+        if self.supremeMasterworkFocusActive:
+            self.supremeMasterworkFocus()
 
     def stunt_reward(self,stunt_num):
         def zero():
@@ -80,21 +101,29 @@ class crafter:
 
     def success(self):
         #Detect number of successes. Create list of 1 or 2 depending on 10 status
-        self.successes = [(1 if (i.result>=7 and i.result<10) else (2 if i.result==10 else 0)) for i in self.dice_pool]
+        self.successes = [([1,i] if (i.result>=7 and i.result<10) else ([2,i] if i.result==10 else [0,i])) for i in self.dice_pool]
         return self.successes
 
     def total_succ(self):
-        return sum(self.successes)
+        return sum(Extract(self.successes,0))
 
-    def supremeMasterworkFocus(self, advanced=False):
-        if advanced:
+    def total_no_DIT_succ(self):
+        all_successes=Extract(self.successes, 0)
+        unused_successes=[]
+        for index,element in enumerate(Extract(self.successes,1)):
+            if element.DITThree==False:
+                unused_successes.append(index)
+        return(sum(np.array(all_successes)[unused_successes]))
+
+    def supremeMasterworkFocus(self):
+        if self.SMFAdvanced:
             #Double 8s (Basic, major or superior Project; 5m, 1WP, 1GXP)
-            self.successes = [2 if (i.result >= 8) else 0 for i in self.dice_pool]
+            self.successes = [[2,i] if (i.result >= 8) else [0,i] for i in self.dice_pool]
             return self.successes
 
         else:
             #Double 9s (basic and major projects; 6m)
-            self.successes=[2 if i.result>=9 else 0 for i in self.dice_pool]
+            self.successes=[[2,i] if i.result>=9 else [0,i] for i in self.dice_pool]
             return self.successes
 
     def flawlessHandiworkMethod(self):
@@ -113,7 +142,6 @@ class crafter:
     def experientialConjuringofTrueVoid(self):
         self.roll(self.int+self.essence)
         self.autosucc += 1
-
 
     def firstMovementoftheDemiurge(self,ECoTV):
         #FMotD enhances the prerequisite, so EcoTV must be active
@@ -139,10 +167,30 @@ class crafter:
                         total_ten_changes-=1
 
     def divineInspirationTechnique(self):
-        return
+        if self.supremeMasterworkFocusActive==True:
+            self.supremeMasterworkFocus()
+            no_DIT_succ=self.total_no_DIT_succ() // 3
+            for roll in self.dice_pool:
+                roll.DITThree=True
+            #roll for every 3 successes (that haven't been rolled yet)
+            self.roll(no_DIT_succ)
 
-    def holisticMiracleUnderstanding(self):
-        return
+            #BAD IMPLEMENTATION - NEEDS DETECTING OF CURRENT NON DIT SUCCESSES
+            #Implementation of Holistic Miracle Understanding
+            if sum([dice_pool.DITThree for dice_pool in self.dice_pool])//3 >= 1:
+                self.roll(3*sum([dice_pool.DITThree for dice_pool in self.dice_pool])//3)
+
+        else:
+            self.success()
+            no_DIT_succ=self.total_no_DIT_succ() // 3
+            for roll in self.dice_pool:
+                roll.DITThree = True
+            self.roll(no_DIT_succ)
+
+            # Implementation of Holistic Miracle Understanding
+            if sum([dice_pool.DITThree for dice_pool in self.dice_pool]) // 3 >= 1:
+                self.roll(3 * sum([dice_pool.DITThree for dice_pool in self.dice_pool]) // 3)
+
 
 class diceresult:
     def __init__(self,die):
@@ -152,14 +200,32 @@ class diceresult:
         self.FmoDThree=False
         self.DITThree=False
 
+def Extract(lst,element):
+    return [item[element] for item in lst]
+
 #Return list of dice results from list of objects
 #[dice_pool.result for dice_pool in fang.dice_pool]
 
-fang=crafter(5,5)
-print(fang.dice_pool)
-fang.success()
+fang=crafter(1,1,essence=3,int=4,stunt=0,supremeMasterworkFocusActive=True,SMFAdvanced=True)
 
-fang.dice_pool=[diceresult(1),diceresult(1),diceresult(1),diceresult(1),diceresult(9),diceresult(9),diceresult(9)]
-fang.firstMovementoftheDemiurge(True)
-[dice_pool.result for dice_pool in fang.dice_pool]
-[dice_pool.FmoDThree for dice_pool in fang.dice_pool]
+
+fang.scenario()
+
+while True:
+    fang.scenario_recur()
+    print(fang.total_succ())
+
+print(fang.total_succ())
+
+# print(fang.dice_pool)
+#
+#
+#
+# fang.success()
+
+
+
+# fang.dice_pool=[diceresult(1),diceresult(1),diceresult(1),diceresult(1),diceresult(9),diceresult(9),diceresult(9)]
+# fang.firstMovementoftheDemiurge(True)
+# [dice_pool.result for dice_pool in fang.dice_pool]
+# [dice_pool.FmoDThree for dice_pool in fang.dice_pool]
