@@ -61,6 +61,7 @@ class crafter:
         #Temporary function to run a potential roll
         #Roll Initial Pool
         self.roll(self.dice)
+        print("First Roll!")
 
         #Roll extra dice with Experiential Conjuring of True Void
         self.experientialConjuringofTrueVoid()
@@ -155,15 +156,19 @@ class crafter:
             if (die.result==10 and die.tenreroll==False):
                 die.tenreroll=True
         self.roll(new_tens)
+        print("New from Tens")
 
         new_sixes = sum([1 if (res.sixreroll==False and res.result==6) else 0 for res in self.dice_pool])
         for die in self.dice_pool:
             if (die.result==6 and die.sixreroll==False):
                 die.sixreroll=True
         self.roll(new_sixes)
+        print("New from Sixes")
+
 
     def experientialConjuringofTrueVoid(self):
         self.roll(self.int+self.essence)
+        print("Experiential!")
         self.autosucc += 1
 
     def firstMovementoftheDemiurge(self,ECoTV):
@@ -202,13 +207,24 @@ class crafter:
     def divineInspirationTechnique(self):
         if self.supremeMasterworkFocusActive==True:
             self.supremeMasterworkFocus()
+            #Need to code this so as to count only successes, and only tag groups of three at a time.
+            #Consider that some dice attribute 2 successes and others only 1
             while self.total_no_DIT_succ() // 3 > 1:
                 self.supremeMasterworkFocus()
                 no_DIT_succ=self.total_no_DIT_succ() // 3
                 for roll in self.dice_pool:
                     roll.DITThree=True
                 #roll for every 3 successes (that haven't been rolled yet)
-                self.roll(no_DIT_succ+3) # implementation of HMU as a plus 3 - how novel
+                self.roll(no_DIT_succ)
+                print("Divine Inspired 3s!")
+                #Add section for the last no_DIT_succ die, check successes, and roll extra HMU if 3+
+                self.supremeMasterworkFocus()
+                if sum([item[0] for item in self.successes[-no_DIT_succ:]])>3:
+                    self.roll(3)
+                    print("Holistic extra 3s")
+
+
+            #Need to make sure the +3 from HMU is additional to the x//3 dice. not 3*(x//3)
 
             # #BAD IMPLEMENTATION - NEEDS DETECTING OF CURRENT NON DIT SUCCESSES
             # #Implementation of Holistic Miracle Understanding
@@ -217,16 +233,16 @@ class crafter:
 
 
         #This is for no Supreme masterwork focus (needs fixing)
-        else:
-            self.success()
-            no_DIT_succ=self.total_no_DIT_succ() // 3
-            for roll in self.dice_pool:
-                roll.DITThree = True
-            self.roll(no_DIT_succ)
-
-            # Implementation of Holistic Miracle Understanding
-            if sum([dice_pool.DITThree for dice_pool in self.dice_pool]) // 3 >= 1:
-                self.roll(3 * sum([dice_pool.DITThree for dice_pool in self.dice_pool]) // 3)
+        # else:
+        #     self.success()
+        #     no_DIT_succ=self.total_no_DIT_succ() // 3
+        #     for roll in self.dice_pool:
+        #         roll.DITThree = True
+        #     self.roll(no_DIT_succ)
+        #
+        #     # Implementation of Holistic Miracle Understanding
+        #     if sum([dice_pool.DITThree for dice_pool in self.dice_pool]) // 3 >= 1:
+        #         self.roll(3 * sum([dice_pool.DITThree for dice_pool in self.dice_pool]) // 3)
 
 
 class diceresult:
@@ -251,15 +267,16 @@ def Extract(lst,element):
 
 fang=crafter(5,5,essence=3,int=4,stunt=0,supremeMasterworkFocusActive=True,SMFAdvanced=True)
 # fang=crafter(1,1,essence=1,int=1,stunt=0,supremeMasterworkFocusActive=True,SMFAdvanced=True)
-
+# fang=crafter(2,2,essence=2,int=2,stunt=0,supremeMasterworkFocusActive=True,SMFAdvanced=True)
 
 fang.scenario()
 prev_res=-1
-# while prev_res!=fang.total_succ():
-while True:
+while prev_res!=fang.total_succ():
+# while True:
+    prev_res = fang.total_succ()
     fang.scenario_recur()
     print(fang.total_succ())
-    prev_res=fang.total_succ()
+
 # print(fang.total_succ())
 
 # print(fang.dice_pool)
