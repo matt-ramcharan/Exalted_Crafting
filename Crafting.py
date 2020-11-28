@@ -34,6 +34,29 @@ class crafter:
         self.int=int
         self.autosucc=0
 
+    # def scenario_enclosed(self):
+    #
+    #     #Temporary function to run a potential roll
+    #     #Roll Initial Pool - ONCE
+    #     self.roll(self.dice)
+    #
+    #     #Roll extra dice with Experiential Conjuring of True Void - ONCE
+    #     self.experientialConjuringofTrueVoid()
+    #
+    #     while True:
+    #         #Reroll 10s and 6s with Flawless Handiwork Method.
+    #         self.flawlessHandiworkMethod()
+    #
+    #         #If ECoTV is active, with 3 of a kind successes, chose one non success die and convert to a 10
+    #         self.firstMovementoftheDemiurge(True)
+    #
+    #         #Apply Divine inspiration technique - recursively gain additional non charm dice
+    #         self.divineInspirationTechnique()
+    #
+    #         #Double 9s or 8s with Supreme Masterwork Focus
+    #         if self.supremeMasterworkFocusActive:
+    #             self.supremeMasterworkFocus()
+
     def scenario(self):
         #Temporary function to run a potential roll
         #Roll Initial Pool
@@ -55,9 +78,9 @@ class crafter:
         if self.supremeMasterworkFocusActive:
             self.supremeMasterworkFocus()
 
+
+
     def scenario_recur(self):
-        #Roll extra dice with Experiential Conjuring of True Void
-        self.experientialConjuringofTrueVoid()
 
         #Reroll 10s and 6s with Flawless Handiwork Method.
         self.flawlessHandiworkMethod()
@@ -155,10 +178,20 @@ class crafter:
 
             #Add FmoDThree tag to dice used to convert non succ to 10s
             for i in success_counts:
-                for j in range(0,success_counts[i]//3):
-                    for die in self.dice_pool:
-                        if die.result==i:
-                            die.FmoDThree=True
+                conversion_num=success_counts[i]//3*3
+
+                true_vals=np.array([dice_pool.result for dice_pool in self.dice_pool]) == i
+                true_indices=[taggingIter for taggingIter, val in enumerate(true_vals) if val]
+                for j in true_indices[:conversion_num]:
+                    self.dice_pool[j].FmoDThree=True
+
+
+                # for j in range(0,conversion_num):
+                #
+                #     if self.dice_pool[j].result==i:
+                #         self.dice_pool[j].FmoDThree=True
+                #     np.array([dice_pool.result for dice_pool in self.dice_pool]) == i
+
             #Convert non succ to 10s
             for die in self.dice_pool:
                 if die.result<7:
@@ -169,17 +202,21 @@ class crafter:
     def divineInspirationTechnique(self):
         if self.supremeMasterworkFocusActive==True:
             self.supremeMasterworkFocus()
-            no_DIT_succ=self.total_no_DIT_succ() // 3
-            for roll in self.dice_pool:
-                roll.DITThree=True
-            #roll for every 3 successes (that haven't been rolled yet)
-            self.roll(no_DIT_succ)
+            while self.total_no_DIT_succ() // 3 > 1:
+                self.supremeMasterworkFocus()
+                no_DIT_succ=self.total_no_DIT_succ() // 3
+                for roll in self.dice_pool:
+                    roll.DITThree=True
+                #roll for every 3 successes (that haven't been rolled yet)
+                self.roll(no_DIT_succ+3) # implementation of HMU as a plus 3 - how novel
 
-            #BAD IMPLEMENTATION - NEEDS DETECTING OF CURRENT NON DIT SUCCESSES
-            #Implementation of Holistic Miracle Understanding
-            if sum([dice_pool.DITThree for dice_pool in self.dice_pool])//3 >= 1:
-                self.roll(3*sum([dice_pool.DITThree for dice_pool in self.dice_pool])//3)
+            # #BAD IMPLEMENTATION - NEEDS DETECTING OF CURRENT NON DIT SUCCESSES
+            # #Implementation of Holistic Miracle Understanding
+            # if sum([dice_pool.DITThree for dice_pool in self.dice_pool])//3 >= 1:
+            #     self.roll(3*sum([dice_pool.DITThree for dice_pool in self.dice_pool])//3)
 
+
+        #This is for no Supreme masterwork focus (needs fixing)
         else:
             self.success()
             no_DIT_succ=self.total_no_DIT_succ() // 3
@@ -199,6 +236,12 @@ class diceresult:
         self.sixreroll=False
         self.FmoDThree=False
         self.DITThree=False
+        self.success=self.success_check(self.result)
+
+    def success_check(self,result):
+        #Checks if result is a success and assigns a boolean
+        success = result>=7
+        return success
 
 def Extract(lst,element):
     return [item[element] for item in lst]
@@ -206,16 +249,18 @@ def Extract(lst,element):
 #Return list of dice results from list of objects
 #[dice_pool.result for dice_pool in fang.dice_pool]
 
-fang=crafter(1,1,essence=3,int=4,stunt=0,supremeMasterworkFocusActive=True,SMFAdvanced=True)
+fang=crafter(5,5,essence=3,int=4,stunt=0,supremeMasterworkFocusActive=True,SMFAdvanced=True)
+# fang=crafter(1,1,essence=1,int=1,stunt=0,supremeMasterworkFocusActive=True,SMFAdvanced=True)
 
 
 fang.scenario()
-
+prev_res=-1
+# while prev_res!=fang.total_succ():
 while True:
     fang.scenario_recur()
     print(fang.total_succ())
-
-print(fang.total_succ())
+    prev_res=fang.total_succ()
+# print(fang.total_succ())
 
 # print(fang.dice_pool)
 #
