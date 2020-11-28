@@ -70,11 +70,12 @@ class crafter:
         #Reroll 10s and 6s with Flawless Handiwork Method.
         self.flawlessHandiworkMethod()
 
+        #Apply Divine inspiration technique - recursively gain additional non charm dice
+        self.divineInspirationTechnique()
+
         #If ECoTV is active, with 3 of a kind successes, chose one non success die and convert to a 10
         self.firstMovementoftheDemiurge(True)
 
-        #Apply Divine inspiration technique - recursively gain additional non charm dice
-        # self.divineInspirationTechnique()
 
         #Double 9s or 8s with Supreme Masterwork Focus
         if self.supremeMasterworkFocusActive:
@@ -87,11 +88,11 @@ class crafter:
         #Reroll 10s and 6s with Flawless Handiwork Method.
         self.flawlessHandiworkMethod()
 
+        #Apply Divine inspiration technique - recursively gain additional non charm dice
+        self.divineInspirationTechnique()
+
         #If ECoTV is active, with 3 of a kind successes, chose one non success die and convert to a 10
         self.firstMovementoftheDemiurge(True)
-
-        #Apply Divine inspiration technique - recursively gain additional non charm dice
-        # self.divineInspirationTechnique()
 
         #Double 9s or 8s with Supreme Masterwork Focus
         if self.supremeMasterworkFocusActive:
