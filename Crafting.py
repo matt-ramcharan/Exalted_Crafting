@@ -33,6 +33,7 @@ class crafter:
         self.essence=essence
         self.int=int
         self.autosucc=0
+        self.HMUUsed=False
 
     # def scenario_enclosed(self):
     #
@@ -73,7 +74,7 @@ class crafter:
         self.firstMovementoftheDemiurge(True)
 
         #Apply Divine inspiration technique - recursively gain additional non charm dice
-        self.divineInspirationTechnique()
+        # self.divineInspirationTechnique()
 
         #Double 9s or 8s with Supreme Masterwork Focus
         if self.supremeMasterworkFocusActive:
@@ -90,7 +91,7 @@ class crafter:
         self.firstMovementoftheDemiurge(True)
 
         #Apply Divine inspiration technique - recursively gain additional non charm dice
-        self.divineInspirationTechnique()
+        # self.divineInspirationTechnique()
 
         #Double 9s or 8s with Supreme Masterwork Focus
         if self.supremeMasterworkFocusActive:
@@ -212,16 +213,39 @@ class crafter:
             while self.total_no_DIT_succ() // 3 > 1:
                 self.supremeMasterworkFocus()
                 no_DIT_succ=self.total_no_DIT_succ() // 3
-                for roll in self.dice_pool:
-                    roll.DITThree=True
+
+                def check_successes_needed(successes, no_DIT_succ):
+                    change_count = 0
+                    changable=[]
+                    for counter,dice in enumerate(successes):
+                        if dice[0]>0 and self.dice_pool[counter].DITThree==False:
+                            change_count+=dice[0]
+                            changable.append(counter)
+                        if change_count>=no_DIT_succ:
+                            return changable
+
+                if check_successes_needed(self.successes,no_DIT_succ)!=0:
+                    for i in check_successes_needed(self.successes,no_DIT_succ):
+                        self.dice_pool[i].DITThree=True
+
                 #roll for every 3 successes (that haven't been rolled yet)
                 self.roll(no_DIT_succ)
                 print("Divine Inspired 3s!")
+
+                #Alt implementation of HMU (aiding initial recursion)
+                if self.HMUUsed==False:
+                    self.roll(3)
+                    self.HMUUsed=True
+
                 #Add section for the last no_DIT_succ die, check successes, and roll extra HMU if 3+
                 self.supremeMasterworkFocus()
-                if sum([item[0] for item in self.successes[-no_DIT_succ:]])>3:
-                    self.roll(3)
-                    print("Holistic extra 3s")
+
+                #One implementation of Holistic Miracle Understanding (crazy recursion)
+                # if sum([item[0] for item in self.successes[-no_DIT_succ:]])>3:
+                #     self.roll(3)
+                #     print("Holistic extra 3s")
+
+                print("Internal check %d" % self.total_succ())
 
 
             #Need to make sure the +3 from HMU is additional to the x//3 dice. not 3*(x//3)
@@ -265,18 +289,30 @@ def Extract(lst,element):
 #Return list of dice results from list of objects
 #[dice_pool.result for dice_pool in fang.dice_pool]
 
-fang=crafter(5,5,essence=3,int=4,stunt=0,supremeMasterworkFocusActive=True,SMFAdvanced=True)
-# fang=crafter(1,1,essence=1,int=1,stunt=0,supremeMasterworkFocusActive=True,SMFAdvanced=True)
-# fang=crafter(2,2,essence=2,int=2,stunt=0,supremeMasterworkFocusActive=True,SMFAdvanced=True)
 
-fang.scenario()
-prev_res=-1
-while prev_res!=fang.total_succ():
-# while True:
-    prev_res = fang.total_succ()
-    fang.scenario_recur()
-    print(fang.total_succ())
 
+
+
+Results=[]
+for x in range(1,10000):
+    fang = crafter(5, 5, essence=3, int=4, stunt=0, supremeMasterworkFocusActive=True, SMFAdvanced=True)
+    # fang=crafter(1,1,essence=1,int=1,stunt=0,supremeMasterworkFocusActive=True,SMFAdvanced=True)
+    # fang=crafter(2,2,essence=2,int=2,stunt=0,supremeMasterworkFocusActive=True,SMFAdvanced=True)
+
+    fang.scenario()
+    prev_res = -1
+    while prev_res!=fang.total_succ():
+    # while True:
+        prev_res = fang.total_succ()
+        fang.scenario_recur()
+        print(fang.total_succ())
+    Results.append(prev_res)
+
+print(Results)
+from seaborn import distplot
+import matplotlib
+distplot(Results)
+matplotlib.pyplot.show()
 # print(fang.total_succ())
 
 # print(fang.dice_pool)
